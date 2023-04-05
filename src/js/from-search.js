@@ -1,4 +1,4 @@
-// import Notiflix from 'notiflix';
+import Notiflix from 'notiflix';
 
 const log = console.log;
 
@@ -16,11 +16,11 @@ const fetchImages = async () => {
   const response = await fetch(
     `${URL_API}?key=${key}&q=${inputSearch.value}${URL_PARAMETERS}`
   );
-  //   if (!response.ok) {
-  //     Notiflix.Notify.failure(
-  //       'Sorry, there are no images matching your search query. Please try again.'
-  //     );
-  //   }
+  if (!response.ok) {
+    Notiflix.Notify.failure(
+      'Sorry, there are no images matching your search query. Please try again.'
+    );
+  }
 };
 
 btnSearch.addEventListener('click', e => {
