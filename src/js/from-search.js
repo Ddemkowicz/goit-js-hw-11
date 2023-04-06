@@ -11,19 +11,21 @@ const URL_PARAMETERS =
 const btnSearch = document.querySelector('.btn');
 const formSearch = document.querySelector('.search-form');
 const inputSearch = document.querySelector('.search-form input');
+const gallery = document.querySelector('.gallery');
 
 const fetchImages = async () => {
   const response = await fetch(
     `${URL_API}?key=${key}&q=${inputSearch.value}${URL_PARAMETERS}`
   );
   if (!response.ok) {
-    Notiflix.Notify.failure(
-      'Sorry, there are no images matching your search query. Please try again.'
-    );
+    throw new Error(response.statusText);
   }
+  const arr = await response.json();
+  return arr;
 };
 
-btnSearch.addEventListener('click', e => {
+btnSearch.addEventListener('click', async e => {
   e.preventDefault();
   log(inputSearch.value);
+  log;
 });
