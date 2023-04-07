@@ -1,0 +1,88 @@
+const resultsPerPage = 10; // liczba wyników na stronie
+let currentPage = 1; // bieżąca strona wyników
+
+btnSearch.addEventListener('click', async e => {
+  e.preventDefault();
+  log(inputSearch.value);
+  const name = inputSearch.value;
+  const totalResults = await fetchTotalResults(name); // pobranie całkowitej liczby wyników
+  const totalPages = Math.ceil(totalResults / resultsPerPage); // obliczenie liczby stron wyników
+  const startIndex = (currentPage - 1) * resultsPerPage; // indeks pierwszego wyniku do pobrania
+  const endIndex = startIndex + resultsPerPage; // indeks ostatniego wyniku do pobrania
+  const photosArr = await fetchImages(name, startIndex, endIndex); // pobranie wyników dla bieżącej strony
+  log(photosArr);
+  gallery.innerHTML = ''; // wyczyszczenie zawartości galerii przed dodaniem nowych elementów
+  for (const photo of photosArr) {
+    gallery.innerHTML += ` <div class="photo-card">
+  <img src="${photo.webformatURL}" alt="${photo.tags}" loading="lazy" />
+  <div class="info">
+    <p class="info-item">
+      <b>Likes: ${photo.likes}</b>
+    </p>
+    <p class="info-item">
+      <b>Views: ${photo.views}</b>
+    </p>
+    <p class="info-item">
+      <b>Comments: ${photo.comments}</b>
+    </p>
+    <p class="info-item">
+      <b>Downloads: ${photo.downloads}</b>
+    </p>
+  </div>
+</div>`;
+  }
+  // dodanie przycisków paginacji
+  pagination.innerHTML = '';
+  if (currentPage > 1) {
+    pagination.innerHTML += `<button class="pagination-button" data-page="${currentPage - 1}">&laquo; Poprzednia</button>`;
+  }
+  if (currentPage < totalPages) {
+    pagination.innerHTML += `<button class="pagination-button" data-page="${currentPage + 1}">Następna &raquo;</button>`;
+  }
+});
+
+// obsługa kliknięcia przycisków paginacji
+pagination.addEventListener('click', async e => {
+  if (e.target.classList.contains('pagination-button')) {
+    currentPage = parseInt(e.target.dataset.page); // aktualizacja bieżącej strony wyników
+    const name = inputSearch.value;
+    const startIndex = (currentPage - 1) * resultsPerPage;
+    const endIndex = startIndex + resultsPerPage;
+    const photosArr = await fetchImages(name, startIndex, endIndex);
+    gallery.innerHTML = '';
+    for (const photo of photosArr) {
+      gallery.innerHTML += ` <div class="photo-card">
+  <img src="${photo.webformatURL}" alt="${photo.tags}" loading="lazy" />
+  <div class="info">
+    <p class="info-item">
+<b>Likes: ${photo.likes}</b>
+</p>
+<p class="info-item">
+<b>Views: ${photo.views}</b>
+</p>
+<p class="info-item">
+<b>Comments: ${photo.comments}</b>
+</p>
+<p class="info-item">
+<b>Downloads: ${photo.downloads}</b>
+</p>
+
+  </div>
+</div>`;
+    }
+    // aktualizacja przycisków paginacji
+    pagination.innerHTML = '';
+    if (currentPage > 1) {
+      pagination.innerHTML += `<button class="pagination-button" data-page="${currentPage - 1}">&laquo; Poprzednia</button>`;
+    }
+    if (currentPage < totalPages) {
+      pagination.innerHTML += `<button class="pagination-button" data-page="${currentPage + 1}">Następna &raquo;</button>`;
+    }
+  }
+});
+// funkcja fetchImages z zapytaniem API z parametrami startIndex i endIndex
+async function fetchImages(name, startIndex, endIndex) {
+const response = await fetch(https://pixabay.com/api/?key=YOUR_API_KEY&q=${name}&image_type=photo&per_page=${resultsPerPage}&safesearch=true&min_width=500&min_height=500&pretty=true&nojsoncallback=true&orientation=horizontal&category=nature&colors=green&order=popular&editors_choice=true&min_upload_date=2010-01-01&max_upload_date=2023-04-06&per_page=${resultsPerPage}&page=${currentPage});
+const data = await response.json();
+return data.hits.slice(startIndex, endIndex); // zwrócenie tylko wyników dla bieżącej strony
+}

@@ -5,27 +5,108 @@ const log = console.log;
 const key = '35091080-36e54d1ab1b489bab378e0aed';
 const URL_API = 'https://pixabay.com/api/';
 const URL_PARAMETERS =
-  '&image_type=photo&orientation=horizontal&safesearch=true';
-// https://pixabay.com/api/?key=35091080-36e54d1ab1b489bab378e0aed&q=cat&image_type=photo&orientation=horizontal&safesearch=true
+  '&image_type=photo&orientation=horizontal&safesearch=true&per_page=4&page=';
+
+// https://pixabay.com/api/?key=35091080-36e54d1ab1b489bab378e0aed&q=cat&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=1
 
 const btnSearch = document.querySelector('.btn');
 const formSearch = document.querySelector('.search-form');
 const inputSearch = document.querySelector('.search-form input');
 const gallery = document.querySelector('.gallery');
+const btnLoadMore = document.querySelector('.load-more');
 
-const fetchImages = async () => {
+async function fetchImages(name) {
   const response = await fetch(
-    `${URL_API}?key=${key}&q=${inputSearch.value}${URL_PARAMETERS}`
+    `${URL_API}?key=${key}&q=${inputSearch.value}${URL_PARAMETERS}1`
   );
+  const arr = await response.json();
   if (!response.ok) {
     throw new Error(response.statusText);
+  } else if (arr.hits.length == 0) {
+    Notiflix.Notify.failure(
+      'Sorry, there are no images matching your search query. Please try again.'
+    );
   }
-  const arr = await response.json();
-  return arr;
-};
+  return arr.hits;
+}
 
 btnSearch.addEventListener('click', async e => {
   e.preventDefault();
   log(inputSearch.value);
-  log;
+  const name = inputSearch.value;
+  const photosArr = await fetchImages(name);
+  log(photosArr);
+  gallery.innerHTML = '';
+
+  for (const photo of photosArr) {
+    gallery.innerHTML += ` <div class="photo-card">
+  <img src="${photo.webformatURL}" alt="${photo.tags}" loading="lazy" />
+  <div class="info">
+    <p class="info-item">
+      <b>Likes: ${photo.likes}</b>
+    </p>
+    <p class="info-item">
+      <b>Views: ${photo.views}</b>
+    </p>
+    <p class="info-item">
+      <b>Comments: ${photo.comments}</b>
+    </p>
+    <p class="info-item">
+      <b>Downloads: ${photo.downloads}</b>
+    </p>
+  </div>
+</div>`;
+  }
 });
+
+let page = 1;
+btnLoadMore.addEventListener('click', async e => {
+  page++;
+  const response = await fetch(
+    `${URL_API}?key=${key}&q=${inputSearch.value}${URL_PARAMETERS}${page}`
+  );
+  const arr = await response.json();
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+  const photosArr = arr.hits;
+  for (const photo of photosArr) {
+    gallery.innerHTML += ` <div class="photo-card">
+  <img src="${photo.webformatURL}" alt="${photo.tags}" loading="lazy" />
+  <div class="info">
+    <p class="info-item">
+      <b>Likes: ${photo.likes}</b>
+    </p>
+    <p class="info-item">
+      <b>Views: ${photo.views}</b>
+    </p>
+    <p class="info-item">
+      <b>Comments: ${photo.comments}</b>
+    </p>
+    <p class="info-item">
+      <b>Downloads: ${photo.downloads}</b>
+    </p>
+  </div>
+</div>`;
+  }
+});
+
+// =======================================
+
+/* <div class="photo-card">
+  <img src="" alt="" loading="lazy" />
+  <div class="info">
+    <p class="info-item">
+      <b>Likes</b>
+    </p>
+    <p class="info-item">
+      <b>Views</b>
+    </p>
+    <p class="info-item">
+      <b>Comments</b>
+    </p>
+    <p class="info-item">
+      <b>Downloads</b>
+    </p>
+  </div>
+</div>; */
