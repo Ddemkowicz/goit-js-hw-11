@@ -5,7 +5,7 @@ const log = console.log;
 const key = '35091080-36e54d1ab1b489bab378e0aed';
 const URL_API = 'https://pixabay.com/api/';
 const URL_PARAMETERS =
-  '&image_type=photo&orientation=horizontal&safesearch=true&per_page=4&page=';
+  '&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=';
 
 // https://pixabay.com/api/?key=35091080-36e54d1ab1b489bab378e0aed&q=cat&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=1
 
@@ -15,6 +15,7 @@ const inputSearch = document.querySelector('.search-form input');
 const gallery = document.querySelector('.gallery');
 const btnLoadMore = document.querySelector('.load-more');
 
+// Funkcja "feczująca"
 async function fetchImages(name) {
   const response = await fetch(
     `${URL_API}?key=${key}&q=${inputSearch.value}${URL_PARAMETERS}1`
@@ -30,12 +31,15 @@ async function fetchImages(name) {
   return arr.hits;
 }
 
+// Obsługa przycisku szukania
 btnSearch.addEventListener('click', async e => {
   e.preventDefault();
   log(inputSearch.value);
+
   const name = inputSearch.value;
   const photosArr = await fetchImages(name);
   log(photosArr);
+
   gallery.innerHTML = '';
 
   for (const photo of photosArr) {
@@ -57,10 +61,14 @@ btnSearch.addEventListener('click', async e => {
   </div>
 </div>`;
   }
+
+  btnLoadMore.classList.remove('is-hidden');
 });
 
+// Obsługa przycisku "Load more"
 let page = 1;
 btnLoadMore.addEventListener('click', async e => {
+  btnLoadMore.classList.toggle('is-hidden');
   page++;
   const response = await fetch(
     `${URL_API}?key=${key}&q=${inputSearch.value}${URL_PARAMETERS}${page}`
@@ -68,8 +76,15 @@ btnLoadMore.addEventListener('click', async e => {
   const arr = await response.json();
   if (!response.ok) {
     throw new Error(response.statusText);
+  } else if (arr.hits.length == 0) {
+    btnLoadMore.classList.add('is-hidden');
+    Notiflix.Notify.info(
+      "We're sorry, but you've reached the end of search results."
+    );
+    returt;
   }
   const photosArr = arr.hits;
+  log(photosArr);
   for (const photo of photosArr) {
     gallery.innerHTML += ` <div class="photo-card">
   <img src="${photo.webformatURL}" alt="${photo.tags}" loading="lazy" />
@@ -89,6 +104,7 @@ btnLoadMore.addEventListener('click', async e => {
   </div>
 </div>`;
   }
+  btnLoadMore.classList.toggle('is-hidden');
 });
 
 // =======================================
